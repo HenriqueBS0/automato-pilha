@@ -1,9 +1,10 @@
 <?php
 
 require_once('Pilha.php');
-require_once('EstadoFinal.php');
 
 class AutomatoPilha {
+
+    const ESTADO_VAZIO = 'VAZIO';
     
     #region Atributos
 
@@ -130,8 +131,80 @@ class AutomatoPilha {
 
     #region Métodos
 
-    public function getTipoEntrada(string $sEntrada) {
+    public function getEstadoFinal(string $sEntrada) : string 
+    {
+        $aCaracteres = str_split($sEntrada);
+        $sEstadoAtual = $this->getEstadoInicial();
+        $oPilha = $this->getPilha();
 
+        foreach ($aCaracteres as $sCaracter) {
+            $this->validarCaracterEntrada($sCaracter);
+            
+            $oTransicao = $this->getTransicao($sEstadoAtual, $sCaracter, $oPilha->getTopo());
+            $sEstadoAtual = $oTransicao->getEstado();
+
+            $this->validarEstadoAtual($sEstadoAtual);
+
+            call_user_func($oTransicao->getOperacao(), $oPilha);
+
+            $this->validarCaracteresPilha($oPilha);
+        }
+
+        $oTransicao = $this->getTransicao($sEstadoAtual, self::ESTADO_VAZIO, $oPilha->getTopo());
+
+        $sEstadoAtual = $oTransicao->getEstado();
+
+        $this->validarEstadoAtual($sEstadoAtual);
+
+        call_user_func($oTransicao->getOperacao(), $oPilha);
+
+        $this->validarCaracteresPilha($oPilha);
+
+        if(!$oPilha->isPilhaVazia()) {
+           throw new Exception("Chegou ao fim da entrada e a pilha não está vazia.");
+        }
+
+        return $sEstadoAtual;
+    }
+
+    private function validarCaracterEntrada(string $sCaracter) {
+        if(!in_array($sCaracter, $this->getAlfabetoEntrada())) {
+            throw new Exception("Caracter {$sCaracter} não está no alfabeto de entrada.");
+        }
+    }
+
+    private function validarEstadoAtual(string $sEstado) {
+        if(!in_array($sEstado, $this->getEstados())) {
+            throw new Exception("O estado {$sEstado} não pertence ao conjunto de estados do automato.");
+        }
+    }
+
+    private function validarCaracteresPilha(Pilha $oPilha) {
+        foreach($oPilha->getElementos() as $sElemento) {
+            if(!in_array($sElemento, $this->getAlfabetoPilha())) {
+                throw new Exception("Elemento {$sElemento} não está no alfabeto da pilha.");
+            }
+        }
+    }
+
+    private function getTransicao(string $sEstadoAtual, string $sCaracter, string $sTopoPilha) : Transicao 
+    {
+
+        $aTransicoes = $this->getTransicoes();
+
+        if(!isset($aTransicoes[$sEstadoAtual])) {
+            throw new Exception("Estado {$sEstadoAtual} não existe.");
+        }
+
+        if(!isset($aTransicoes[$sEstadoAtual][$sCaracter])) {
+            throw new Exception("O caracter {$sCaracter} não está previsto para o estado {$sEstadoAtual}");
+        }
+
+        if(!isset($aTransicoes[$sEstadoAtual][$sCaracter][$sTopoPilha])) {
+            throw new Exception("O topo da pilha {$sTopoPilha} não está previsto para o caracter {$sCaracter} e estado {$sEstadoAtual}");
+        }
+
+        return $aTransicoes[$sEstadoAtual][$sCaracter][$sTopoPilha];
     }
 
     #endregion

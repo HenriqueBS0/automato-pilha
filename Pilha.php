@@ -8,7 +8,7 @@ class Pilha {
         $this->inserir($sElementoInicial);
     }
 
-    private function getElementos() : array 
+    public function getElementos() : array 
     {
         return $this->aElementos;
     }
@@ -23,21 +23,17 @@ class Pilha {
         return count($this->getElementos());
     }
 
-    private function isPilhaVazia() : bool
+    public function isPilhaVazia() : bool
     {
         return $this->getNumeroElementos() === 1;
     }
 
-    public function getTopo() : null|string|int
+    public function getTopo() : string
     {
-        if($this->isPilhaVazia()) {
-            return null;
-        }
-
         return $this->getElementos()[$this->getNumeroElementos() - 1];
     }
 
-    public function inserir(string|int $xElemento) : void
+    public function inserir(string $xElemento) : void
     {
         $aElementos = $this->getElementos();
         $aElementos[] = $xElemento;
