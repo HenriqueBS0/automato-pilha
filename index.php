@@ -41,7 +41,7 @@ $aTransicoes = [
 
 $oAutomato = new AutomatoPilha($aEstados, $aAlfabetoEntrada, $aAlfabetoPilha, $sEstadoInicial, $sElementoInicial, $aEstadosFinais, $aTransicoes);
 
-$sEntrada = 'caabbbb';
+$sEntrada = 'abb';
 
 $aDescritivoEstadosFinais = ['f' => 'Aceitou Entrada!'];
 
