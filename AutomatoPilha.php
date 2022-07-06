@@ -134,6 +134,7 @@ class AutomatoPilha {
     public function getEstadoFinal(string $sEntrada) : string 
     {
         $aCaracteres = str_split($sEntrada);
+        $aCaracteres[] = self::ESTADO_VAZIO;
         $sEstadoAtual = $this->getEstadoInicial();
         $oPilha = $this->getPilha();
 
@@ -150,25 +151,19 @@ class AutomatoPilha {
             $this->validarCaracteresPilha($oPilha);
         }
 
-        $oTransicao = $this->getTransicao($sEstadoAtual, self::ESTADO_VAZIO, $oPilha->getTopo());
-
-        $sEstadoAtual = $oTransicao->getEstado();
-
-        $this->validarEstadoAtual($sEstadoAtual);
-
-        call_user_func($oTransicao->getOperacao(), $oPilha);
-
-        $this->validarCaracteresPilha($oPilha);
-
         if(!$oPilha->isPilhaVazia()) {
            throw new Exception("Chegou ao fim da entrada e a pilha não está vazia.");
+        }
+
+        if(!in_array($sEstadoAtual, $this->getEstadosFinais())) {
+            throw new Exception("O estado {$sEstadoAtual} não pertence ao conjunto de estados finais.");
         }
 
         return $sEstadoAtual;
     }
 
     private function validarCaracterEntrada(string $sCaracter) {
-        if(!in_array($sCaracter, $this->getAlfabetoEntrada())) {
+        if($sCaracter !== self::ESTADO_VAZIO && !in_array($sCaracter, $this->getAlfabetoEntrada())) {
             throw new Exception("Caracter {$sCaracter} não está no alfabeto de entrada.");
         }
     }
